@@ -21,9 +21,9 @@ namespace OOP_Projektarbete_Backend.Controllers
             _movieRepository = movieRepository;
         }
 
-        // GET: api/<MovieController>
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        // GET: api/<MovieController>/Trending
+        [HttpGet("[action]")]
+        public async Task<IActionResult> Trending()
         {
             var movies = await _movieRepository.GetTrendingMovies();
 
@@ -33,29 +33,52 @@ namespace OOP_Projektarbete_Backend.Controllers
             return BadRequest();
         }
 
-        // GET api/<MovieController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET: api/<MovieController>/Popular
+        [HttpGet("[action]")]
+        public async Task<IActionResult> Popular()
         {
-            return "value";
+            var movies = await _movieRepository.GetPopularMovies();
+
+            if (movies != null)
+                return Ok(movies);
+
+            return BadRequest();
         }
 
-        // POST api/<MovieController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // GET: api/<MovieController>/TopRated
+        [HttpGet("[action]")]
+        public async Task<IActionResult> TopRated()
         {
+            var movies = await _movieRepository.GetTopRatedMovies();
+
+            if (movies != null)
+                return Ok(movies);
+
+            return BadRequest();
         }
 
-        // PUT api/<MovieController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // GET: api/<MovieController>/Upcoming
+        [HttpGet("[action]")]
+        public async Task<IActionResult> Upcoming()
         {
+            var movies = await _movieRepository.GetUpcomingMovies();
+
+            if (movies != null)
+                return Ok(movies);
+
+            return BadRequest();
         }
 
-        // DELETE api/<MovieController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // GET api/<MovieController>/query
+        [HttpGet("{query}")]
+        public async Task<IActionResult> Get(string query)
         {
+            var movies = await _movieRepository.GetQueriedMovies(query);
+
+            if (movies != null)
+                return Ok(movies);
+
+            return BadRequest();
         }
     }
 }

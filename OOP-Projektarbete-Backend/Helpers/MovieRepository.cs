@@ -91,7 +91,7 @@ namespace OOP_Projektarbete_Backend.Helpers
 
             try
             {
-                return await client.GetFromJsonAsync<MovieInfo>($"search/movie?api_key={apiKey}&language=en-US&page=1&include_adult=false&{query}");
+                return await client.GetFromJsonAsync<MovieInfo>($"search/movie?api_key={apiKey}&language=en-US&page=1&include_adult=false&query={query}");
             }
             catch (Exception ex)
             {
