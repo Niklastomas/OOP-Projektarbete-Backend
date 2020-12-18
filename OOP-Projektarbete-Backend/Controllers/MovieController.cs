@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 using OOP_Projektarbete_Backend.Helpers;
 using OOP_Projektarbete_Backend.Models;
 using System;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 namespace OOP_Projektarbete_Backend.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors("CORSPolicy")]
     [ApiController]
     public class MovieController : ControllerBase
     {

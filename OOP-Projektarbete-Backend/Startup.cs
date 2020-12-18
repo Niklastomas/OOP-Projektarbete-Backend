@@ -36,6 +36,11 @@ namespace OOP_Projektarbete_Backend
             {
                 c.BaseAddress = new Uri(Configuration.GetValue<string>("BaseAddress"));
             });
+            services.AddCors(o => o.AddPolicy("CORSPolicy", builder =>
+                builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()));
+
             services.AddTransient<IMovieRepository, MovieRepository>();
         }
 
@@ -54,6 +59,8 @@ namespace OOP_Projektarbete_Backend
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors("CORSPolicy");
 
             app.UseEndpoints(endpoints =>
             {
