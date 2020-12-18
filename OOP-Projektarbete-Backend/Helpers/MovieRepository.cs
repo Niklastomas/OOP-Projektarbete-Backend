@@ -35,5 +35,69 @@ namespace OOP_Projektarbete_Backend.Helpers
                 return null;
             }
         }
+
+        public async Task<MovieInfo> GetPopularMovies()
+        {
+            var client = _clientFactory.CreateClient("movie");
+            var apiKey = _configuration.GetValue<string>("APIKey");
+
+            try
+            {
+                return await client.GetFromJsonAsync<MovieInfo>($"movie/popular?api_key={apiKey}&language=en-US&page=1");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<MovieInfo> GetTopRatedMovies()
+        {
+            var client = _clientFactory.CreateClient("movie");
+            var apiKey = _configuration.GetValue<string>("APIKey");
+
+            try
+            {
+                return await client.GetFromJsonAsync<MovieInfo>($"movie/top_rated?api_key={apiKey}&language=en-US&page=1");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<MovieInfo> GetUpcomingMovies()
+        {
+            var client = _clientFactory.CreateClient("movie");
+            var apiKey = _configuration.GetValue<string>("APIKey");
+
+            try
+            {
+                return await client.GetFromJsonAsync<MovieInfo>($"movie/upcoming?api_key={apiKey}&language=en-US&page=1");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<MovieInfo> GetQueriedMovies(string query)
+        {
+            var client = _clientFactory.CreateClient("movie");
+            var apiKey = _configuration.GetValue<string>("APIKey");
+
+            try
+            {
+                return await client.GetFromJsonAsync<MovieInfo>($"search/movie?api_key={apiKey}&language=en-US&page=1&include_adult=false&{query}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
     }
 }
