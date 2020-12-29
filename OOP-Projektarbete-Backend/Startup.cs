@@ -41,7 +41,8 @@ namespace OOP_Projektarbete_Backend
                 .AllowAnyMethod()
                 .AllowAnyHeader()));
 
-            services.AddTransient<IMovieRepository, MovieRepository>();
+            services.AddScoped<IMovieRepository, MovieRepository>();
+            services.AddScoped<IHttpService, HttpService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

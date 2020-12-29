@@ -11,93 +11,43 @@ namespace OOP_Projektarbete_Backend.Helpers
 {
     public class MovieRepository : IMovieRepository
     {
-        private IHttpClientFactory _clientFactory;
-        private IConfiguration _configuration;
+        private readonly IHttpService _httpService;
+        private readonly string _apiKey;
 
-        public MovieRepository(IHttpClientFactory clientFactory, IConfiguration configuration)
+        public MovieRepository(IHttpService httpService, IConfiguration configuration)
         {
-            _clientFactory = clientFactory;
-            _configuration = configuration;
+            _httpService = httpService;
+            _apiKey = configuration.GetValue<string>("APIKey");
         }
 
         public async Task<MovieInfo> GetTrendingMovies()
         {
-            var client = _clientFactory.CreateClient("movie");
-            var apiKey = _configuration.GetValue<string>("APIKey");
-
-            try
-            {
-                return await client.GetFromJsonAsync<MovieInfo>($"trending/all/day?api_key={apiKey}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
+            return await _httpService.Get<MovieInfo>($"trending/all/day?api_key={_apiKey}");
         }
 
         public async Task<MovieInfo> GetPopularMovies()
         {
-            var client = _clientFactory.CreateClient("movie");
-            var apiKey = _configuration.GetValue<string>("APIKey");
-
-            try
-            {
-                return await client.GetFromJsonAsync<MovieInfo>($"movie/popular?api_key={apiKey}&language=en-US&page=1");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
+            return await _httpService.Get<MovieInfo>($"movie/popular?api_key={_apiKey}&language=en-US&page=1");
         }
 
         public async Task<MovieInfo> GetTopRatedMovies()
         {
-            var client = _clientFactory.CreateClient("movie");
-            var apiKey = _configuration.GetValue<string>("APIKey");
-
-            try
-            {
-                return await client.GetFromJsonAsync<MovieInfo>($"movie/top_rated?api_key={apiKey}&language=en-US&page=1");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
+            return await _httpService.Get<MovieInfo>($"movie/top_rated?api_key={_apiKey}&language=en-US&page=1");
         }
 
         public async Task<MovieInfo> GetUpcomingMovies()
         {
-            var client = _clientFactory.CreateClient("movie");
-            var apiKey = _configuration.GetValue<string>("APIKey");
-
-            try
-            {
-                return await client.GetFromJsonAsync<MovieInfo>($"movie/upcoming?api_key={apiKey}&language=en-US&page=1");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
+            return await _httpService.Get<MovieInfo>($"movie/upcoming?api_key={_apiKey}&language=en-US&page=1");
         }
 
         public async Task<MovieInfo> GetQueriedMovies(string query)
         {
-            var client = _clientFactory.CreateClient("movie");
-            var apiKey = _configuration.GetValue<string>("APIKey");
+            return await _httpService.Get<MovieInfo>($"search/movie?api_key={_apiKey}&language=en-US&page=1&include_adult=false&query={query}");
+        }
 
-            try
-            {
-                return await client.GetFromJsonAsync<MovieInfo>($"search/movie?api_key={apiKey}&language=en-US&page=1&include_adult=false&query={query}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
+        public async Task<Movie> GetMovieDetails(string id)
+        {
+            return await _httpService.Get<Movie>($"movie/{id}?api_key={_apiKey}&language=en-US");
         }
     }
 }

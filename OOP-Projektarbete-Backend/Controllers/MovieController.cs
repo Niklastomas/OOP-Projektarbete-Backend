@@ -82,5 +82,17 @@ namespace OOP_Projektarbete_Backend.Controllers
 
             return BadRequest();
         }
+
+        // GET api/<MovieController>/query
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> MovieDetails(string id)
+        {
+            var movie = await _movieRepository.GetMovieDetails(id);
+
+            if (movie != null)
+                return Ok(movie);
+
+            return BadRequest();
+        }
     }
 }
