@@ -49,5 +49,10 @@ namespace OOP_Projektarbete_Backend.Helpers
         {
             return await _httpService.Get<Movie>($"movie/{id}?api_key={_apiKey}&language=en-US");
         }
+
+        public async Task<Trailer> GetMovieTrailer(string id)
+        {
+            return await _httpService.Get<Trailer>($"movie/{id}/videos?api_key={_apiKey}&language=en-US");
+        }
     }
 }

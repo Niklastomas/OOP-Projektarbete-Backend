@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using OOP_Projektarbete_Backend.DTOs;
 using OOP_Projektarbete_Backend.Helpers;
 using OOP_Projektarbete_Backend.Models;
 using System;
@@ -88,9 +89,29 @@ namespace OOP_Projektarbete_Backend.Controllers
         public async Task<IActionResult> MovieDetails(string id)
         {
             var movie = await _movieRepository.GetMovieDetails(id);
+            var trailer = await _movieRepository.GetMovieTrailer(id);
 
             if (movie != null)
-                return Ok(movie);
+            {
+                var movieDTO = new MovieDTO()
+                {
+                    Movie = movie,
+                    Trailer = trailer
+                };
+
+                return Ok(movieDTO);
+            }
+
+            return BadRequest();
+        }
+
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> Trailer(string id)
+        {
+            var trailer = await _movieRepository.GetMovieTrailer(id);
+
+            if (trailer != null)
+                return Ok(trailer);
 
             return BadRequest();
         }
