@@ -37,10 +37,10 @@ namespace OOP_Projektarbete_Backend.Controllers
         }
 
         // GET: api/<MovieController>/Popular
-        [HttpGet("[action]")]
-        public async Task<IActionResult> Popular()
+        [HttpGet("[action]/{page}")]
+        public async Task<IActionResult> Popular(string page)
         {
-            var movies = await _movieRepository.GetPopularMovies();
+            var movies = await _movieRepository.GetPopularMovies(page);
 
             if (movies != null)
                 return Ok(movies);
@@ -49,10 +49,10 @@ namespace OOP_Projektarbete_Backend.Controllers
         }
 
         // GET: api/<MovieController>/TopRated
-        [HttpGet("[action]")]
-        public async Task<IActionResult> TopRated()
+        [HttpGet("[action]/{page}")]
+        public async Task<IActionResult> TopRated(string page)
         {
-            var movies = await _movieRepository.GetTopRatedMovies();
+            var movies = await _movieRepository.GetTopRatedMovies(page);
 
             if (movies != null)
                 return Ok(movies);
@@ -61,10 +61,10 @@ namespace OOP_Projektarbete_Backend.Controllers
         }
 
         // GET: api/<MovieController>/Upcoming
-        [HttpGet("[action]")]
-        public async Task<IActionResult> Upcoming()
+        [HttpGet("[action]/{page}")]
+        public async Task<IActionResult> Upcoming(string page)
         {
-            var movies = await _movieRepository.GetUpcomingMovies();
+            var movies = await _movieRepository.GetUpcomingMovies(page);
 
             if (movies != null)
                 return Ok(movies);

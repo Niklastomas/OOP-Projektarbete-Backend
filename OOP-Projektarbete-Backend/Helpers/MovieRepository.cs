@@ -25,19 +25,19 @@ namespace OOP_Projektarbete_Backend.Helpers
             return await _httpService.Get<MovieInfo>($"trending/all/day?api_key={_apiKey}");
         }
 
-        public async Task<MovieInfo> GetPopularMovies()
+        public async Task<MovieInfo> GetPopularMovies(string page)
         {
-            return await _httpService.Get<MovieInfo>($"movie/popular?api_key={_apiKey}&language=en-US&page=1");
+            return await _httpService.Get<MovieInfo>($"movie/popular?api_key={_apiKey}&language=en-US&page={page}");
         }
 
-        public async Task<MovieInfo> GetTopRatedMovies()
+        public async Task<MovieInfo> GetTopRatedMovies(string page)
         {
-            return await _httpService.Get<MovieInfo>($"movie/top_rated?api_key={_apiKey}&language=en-US&page=1");
+            return await _httpService.Get<MovieInfo>($"movie/top_rated?api_key={_apiKey}&language=en-US&page={page}");
         }
 
-        public async Task<MovieInfo> GetUpcomingMovies()
+        public async Task<MovieInfo> GetUpcomingMovies(string page)
         {
-            return await _httpService.Get<MovieInfo>($"movie/upcoming?api_key={_apiKey}&language=en-US&page=1");
+            return await _httpService.Get<MovieInfo>($"movie/upcoming?api_key={_apiKey}&language=en-US&page={page}");
         }
 
         public async Task<MovieInfo> GetQueriedMovies(string query)

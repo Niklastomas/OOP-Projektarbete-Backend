@@ -8,11 +8,11 @@ namespace OOP_Projektarbete_Backend.Helpers
     {
         Task<MovieInfo> GetTrendingMovies();
 
-        Task<MovieInfo> GetPopularMovies();
+        Task<MovieInfo> GetPopularMovies(string page);
 
-        Task<MovieInfo> GetTopRatedMovies();
+        Task<MovieInfo> GetTopRatedMovies(string page);
 
-        Task<MovieInfo> GetUpcomingMovies();
+        Task<MovieInfo> GetUpcomingMovies(string page);
 
         Task<MovieInfo> GetQueriedMovies(string query);
 
