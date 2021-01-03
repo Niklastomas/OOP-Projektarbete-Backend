@@ -1,16 +1,22 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OOP_Projektarbete_Backend.Helpers;
+using OOP_Projektarbete_Backend.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace OOP_Projektarbete_Backend
@@ -32,10 +38,32 @@ namespace OOP_Projektarbete_Backend
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "OOP_Projektarbete_Backend", Version = "v1" });
             });
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Configuration["jwt:key"])),
+                    ClockSkew = TimeSpan.Zero
+                });
+
             services.AddHttpClient("movie", c =>
             {
                 c.BaseAddress = new Uri(Configuration.GetValue<string>("BaseAddress"));
             });
+
             services.AddCors(o => o.AddPolicy("CORSPolicy", builder =>
                 builder.AllowAnyOrigin()
                 .AllowAnyMethod()
@@ -58,6 +86,8 @@ namespace OOP_Projektarbete_Backend
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseAuthorization();
 

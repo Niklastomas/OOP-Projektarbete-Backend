@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using OOP_Projektarbete_Backend.DTOs;
 using OOP_Projektarbete_Backend.Helpers;
@@ -38,6 +40,7 @@ namespace OOP_Projektarbete_Backend.Controllers
 
         // GET: api/<MovieController>/Popular
         [HttpGet("[action]/{page}")]
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Popular(string page)
         {
             var movies = await _movieRepository.GetPopularMovies(page);
