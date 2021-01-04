@@ -76,10 +76,10 @@ namespace OOP_Projektarbete_Backend.Controllers
         }
 
         // GET api/<MovieController>/query
-        [HttpGet("{query}")]
-        public async Task<IActionResult> Get(string query)
+        [HttpGet("{query}/{page}")]
+        public async Task<IActionResult> Get(string query, string page)
         {
-            var movies = await _movieRepository.GetQueriedMovies(query);
+            var movies = await _movieRepository.GetQueriedMovies(query, page);
 
             if (movies != null)
                 return Ok(movies);

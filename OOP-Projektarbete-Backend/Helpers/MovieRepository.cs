@@ -40,9 +40,9 @@ namespace OOP_Projektarbete_Backend.Helpers
             return await _httpService.Get<MovieInfo>($"movie/upcoming?api_key={_apiKey}&language=en-US&page={page}");
         }
 
-        public async Task<MovieInfo> GetQueriedMovies(string query)
+        public async Task<MovieInfo> GetQueriedMovies(string query, string page)
         {
-            return await _httpService.Get<MovieInfo>($"search/movie?api_key={_apiKey}&language=en-US&page=1&include_adult=false&query={query}");
+            return await _httpService.Get<MovieInfo>($"search/movie?api_key={_apiKey}&language=en-US&page=1&include_adult=false&query={query}&page={page}");
         }
 
         public async Task<Movie> GetMovieDetails(string id)
