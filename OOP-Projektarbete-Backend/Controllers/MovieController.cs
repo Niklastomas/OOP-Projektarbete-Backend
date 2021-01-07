@@ -30,12 +30,17 @@ namespace OOP_Projektarbete_Backend.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> Trending()
         {
-            var movies = await _movieRepository.GetTrendingMovies();
+            try
+            {
+                return Ok(await _movieRepository.GetTrendingMovies());
 
-            if (movies != null)
-                return Ok(movies);
-
-            return BadRequest();
+                //if (movies != null)
+                //    return Ok(movies);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: api/<MovieController>/Popular
@@ -75,8 +80,9 @@ namespace OOP_Projektarbete_Backend.Controllers
             return BadRequest();
         }
 
-        // GET api/<MovieController>/query
+        // GET api/<MovieController>/query/page
         [HttpGet("{query}/{page}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Get(string query, string page)
         {
             var movies = await _movieRepository.GetQueriedMovies(query, page);
@@ -87,7 +93,7 @@ namespace OOP_Projektarbete_Backend.Controllers
             return BadRequest();
         }
 
-        // GET api/<MovieController>/query
+        // GET api/MovieDetails/id
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> MovieDetails(string id)
         {

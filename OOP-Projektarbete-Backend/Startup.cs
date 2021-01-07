@@ -33,6 +33,11 @@ namespace OOP_Projektarbete_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(o => o.AddPolicy("CORSPolicy", builder =>
+                builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()));
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -74,11 +79,6 @@ namespace OOP_Projektarbete_Backend
                 c.BaseAddress = new Uri(Configuration.GetValue<string>("BaseAddress"));
             });
 
-            services.AddCors(o => o.AddPolicy("CORSPolicy", builder =>
-                builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()));
-
             services.AddScoped<IMovieRepository, MovieRepository>();
             services.AddScoped<IHttpService, HttpService>();
         }
@@ -96,12 +96,11 @@ namespace OOP_Projektarbete_Backend
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseAuthorization();
 
             app.UseCors("CORSPolicy");
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

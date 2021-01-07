@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -14,7 +15,9 @@ using System.Threading.Tasks;
 namespace OOP_Projektarbete_Backend.Controllers
 {
     [ApiController]
+    [EnableCors("CORSPolicy")]
     [Route("api/[controller]")]
+
     public class AccountController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
