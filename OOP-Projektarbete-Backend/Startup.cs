@@ -79,6 +79,8 @@ namespace OOP_Projektarbete_Backend
                 c.BaseAddress = new Uri(Configuration.GetValue<string>("BaseAddress"));
             });
 
+            services.AddHttpContextAccessor();
+
             services.AddScoped<IMovieRepository, MovieRepository>();
             services.AddScoped<IHttpService, HttpService>();
         }

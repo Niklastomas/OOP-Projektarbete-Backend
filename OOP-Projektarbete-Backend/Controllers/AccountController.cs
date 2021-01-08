@@ -71,6 +71,7 @@ namespace OOP_Projektarbete_Backend.Controllers
             {
                 new Claim(ClaimTypes.Name, userInfo.Email),
                 new Claim(ClaimTypes.Email, userInfo.Email),
+                new Claim(ClaimTypes.NameIdentifier, userInfo.Email)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["jwt:key"]));

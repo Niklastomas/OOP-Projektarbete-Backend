@@ -19,5 +19,7 @@ namespace OOP_Projektarbete_Backend.Helpers
         Task<Movie> GetMovieDetails(string id);
 
         Task<Trailer> GetMovieTrailer(string id);
+
+        Task<Movie> GetMovieById(string id);
     }
 }

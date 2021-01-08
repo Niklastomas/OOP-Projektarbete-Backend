@@ -15,8 +15,11 @@ namespace OOP_Projektarbete_Backend
         {
         }
 
+        public DbSet<UsersMovies> UsersMovies { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<UsersMovies>().HasKey(x => new { x.Id });
             base.OnModelCreating(builder);
         }
     }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OOP_Projektarbete_Backend;
 
 namespace OOP_Projektarbete_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210108101428_UsersMovies_Update_Properties")]
+    partial class UsersMovies_Update_Properties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,16 +219,13 @@ namespace OOP_Projektarbete_Backend.Migrations
 
             modelBuilder.Entity("OOP_Projektarbete_Backend.Models.UsersMovies", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("MovieId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.ToTable("UsersMovies");
                 });

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OOP_Projektarbete_Backend;
 
 namespace OOP_Projektarbete_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210108095651_UsersMovies")]
+    partial class UsersMovies
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -82,6 +84,10 @@ namespace OOP_Projektarbete_Backend.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -133,6 +139,8 @@ namespace OOP_Projektarbete_Backend.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -217,18 +225,27 @@ namespace OOP_Projektarbete_Backend.Migrations
 
             modelBuilder.Entity("OOP_Projektarbete_Backend.Models.UsersMovies", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId1")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("MovieId")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("UserId", "MovieId");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
+                    b.HasIndex("UserId1");
 
                     b.ToTable("UsersMovies");
+                });
+
+            modelBuilder.Entity("OOP_Projektarbete_Backend.Models.User", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.HasDiscriminator().HasValue("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -280,6 +297,20 @@ namespace OOP_Projektarbete_Backend.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("OOP_Projektarbete_Backend.Models.UsersMovies", b =>
+                {
+                    b.HasOne("OOP_Projektarbete_Backend.Models.User", "User")
+                        .WithMany("UsersMovies")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OOP_Projektarbete_Backend.Models.User", b =>
+                {
+                    b.Navigation("UsersMovies");
                 });
 #pragma warning restore 612, 618
         }
