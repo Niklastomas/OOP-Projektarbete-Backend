@@ -58,9 +58,10 @@ namespace OOP_Projektarbete_Backend.Controllers
 
         [HttpPost("[action]/{movieId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task AddMovie(string movieId)
+        public async Task<IActionResult> AddMovie(string movieId)
         {
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var movie = await _movieRepository.GetMovieDetails(movieId);
             var usersMovies = new UsersMovies()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -69,6 +70,23 @@ namespace OOP_Projektarbete_Backend.Controllers
             };
             _context.UsersMovies.Add(usersMovies);
             await _context.SaveChangesAsync();
+            return Ok(movie);
+        }
+
+        [HttpDelete("[action]/{movieId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> DeleteMovie(string movieId)
+        {
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var usersMovies = await _context.UsersMovies.Where(x => x.UserId == user.Id).Where(x => x.MovieId == movieId).FirstOrDefaultAsync();
+
+            if (usersMovies != null)
+            {
+                _context.UsersMovies.Remove(usersMovies);
+                await _context.SaveChangesAsync();
+                return Ok(movieId);
+            }
+            return BadRequest();
         }
     }
 }
