@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OOP_Projektarbete_Backend
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -19,8 +19,19 @@ namespace OOP_Projektarbete_Backend
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<UsersMovies>().HasKey(x => new { x.Id });
             base.OnModelCreating(builder);
+
+            builder.Entity<UsersMovies>().HasKey(x => new { x.Id });
+
+            builder.Entity<Friend>()
+                .HasOne(x => x.RequestedBy)
+                .WithMany(x => x.SentFriendRequests)
+                .HasForeignKey(x => x.RequestedById);
+
+            builder.Entity<Friend>()
+                .HasOne(x => x.RequestedTo)
+                .WithMany(x => x.ReceievedFriendRequests)
+                .HasForeignKey(x => x.RequestedToId);
         }
     }
 }

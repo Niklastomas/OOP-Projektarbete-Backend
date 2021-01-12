@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using OOP_Projektarbete_Backend.DTOs;
+using OOP_Projektarbete_Backend.Models;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,12 +21,12 @@ namespace OOP_Projektarbete_Backend.Controllers
 
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public AccountController(UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+        public AccountController(UserManager<User> userManager,
+            SignInManager<User> signInManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
@@ -36,7 +37,7 @@ namespace OOP_Projektarbete_Backend.Controllers
         [HttpPost("Create")]
         public async Task<ActionResult<UserToken>> CreateUser([FromBody] UserInfo model)
         {
-            var user = new IdentityUser { UserName = model.Email, Email = model.Email };
+            var user = new User { UserName = model.Email, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)

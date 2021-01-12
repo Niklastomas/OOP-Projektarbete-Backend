@@ -38,6 +38,11 @@ namespace OOP_Projektarbete_Backend
                 .AllowAnyMethod()
                 .AllowAnyHeader()));
 
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+);
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -47,7 +52,7 @@ namespace OOP_Projektarbete_Backend
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

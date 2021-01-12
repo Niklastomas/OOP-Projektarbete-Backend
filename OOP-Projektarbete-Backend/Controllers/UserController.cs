@@ -22,10 +22,10 @@ namespace OOP_Projektarbete_Backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IMovieRepository _movieRepository;
 
-        public UserController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IMovieRepository movieRepository)
+        public UserController(ApplicationDbContext context, UserManager<User> userManager, IMovieRepository movieRepository)
         {
             _context = context;
             _userManager = userManager;
@@ -87,6 +87,41 @@ namespace OOP_Projektarbete_Backend.Controllers
                 return Ok(movieId);
             }
             return BadRequest();
+        }
+
+        [HttpPost("[action]/{userId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> SendFriendRequest(string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
+            var friend = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+            if (user != null && friend != null)
+            {
+                var friendRequest = new Friend()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    RequestedBy = user,
+                    RequestedTo = friend,
+                    RequestedTime = DateTime.Now,
+                    FriendRequestFlag = FriendRequestFlag.None
+                };
+                user.SentFriendRequests.Add(friendRequest);
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetFriends()
+        {
+            var user = await _context.Users.Include(x => x.SentFriendRequests).FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
+            return Ok(user);
         }
     }
 }
