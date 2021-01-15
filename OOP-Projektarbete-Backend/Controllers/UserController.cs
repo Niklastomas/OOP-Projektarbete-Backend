@@ -31,6 +31,32 @@ namespace OOP_Projektarbete_Backend.Controllers
             _userManager = userManager;
             _movieRepository = movieRepository;
         }
+        [HttpGet("[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetUsers()
+        {
+            var userList = new List<UserDTO>();
+            var users = await _context.Users.Where(x => x.Email != User.Identity.Name).ToListAsync();
+
+            if (users != null)
+            {
+                foreach (var user in users)
+                {
+                    var userDTO = new UserDTO()
+                    {
+                        Id = user.Id,
+                        Username = user.UserName,
+                        Email = user.Email
+                    };
+                    userList.Add(userDTO);
+                }
+                return Ok(userList);
+            }
+            return NotFound();
+          
+        }
+
+
 
         [HttpGet("[action]")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
