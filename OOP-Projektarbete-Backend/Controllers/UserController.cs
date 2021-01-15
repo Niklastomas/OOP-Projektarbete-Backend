@@ -120,8 +120,68 @@ namespace OOP_Projektarbete_Backend.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetFriends()
         {
-            var user = await _context.Users.Include(x => x.SentFriendRequests).FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
-            return Ok(user);
+            var friends = new List<UserDTO>();
+            
+            var user = await _context.Users
+                .Include(x => x.SentFriendRequests.Where(x => x.FriendRequestFlag == FriendRequestFlag.Approved))
+                .Include(x => x.ReceievedFriendRequests.Where(x => x.FriendRequestFlag == FriendRequestFlag.Approved))
+                .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
+            if (user.SentFriendRequests != null)
+            {
+                foreach (var request in user.SentFriendRequests)
+                {
+                    var friend = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.RequestedToId);
+                    var userDTO = new UserDTO()
+                    {
+                        Id = friend.Id,
+                        Username = friend.UserName,
+                        Email = friend.Email
+                    };
+                    friends.Add(userDTO);
+                    
+                }
+            }
+
+            if (user.ReceievedFriendRequests != null)
+            {
+                foreach (var request in user.ReceievedFriendRequests)
+                {
+                    var friend = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.RequestedById);
+                    var userDTO = new UserDTO()
+                    {
+                        Id = friend.Id,
+                        Username = friend.UserName,
+                        Email = friend.Email
+                    };
+                    friends.Add(userDTO);
+
+                }
+            }
+
+            if (friends != null)
+                return Ok(friends);
+
+            return BadRequest();
+            
+
+        }
+
+        [HttpPost("[action]/{requestedById}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> AcceptFriendRequest(string requestedById)
+        {
+            var user = await _context.Users
+                .Include(x => x.ReceievedFriendRequests)
+                .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
+
+            var friendRequest = user.ReceievedFriendRequests
+                .Where(x => x.RequestedById == requestedById)
+                .Where(x => x.RequestedToId == user.Id)
+                .FirstOrDefault();
+            friendRequest.FriendRequestFlag = FriendRequestFlag.Approved;
+            await _context.SaveChangesAsync();
+            return Ok();
+           
         }
     }
 }
