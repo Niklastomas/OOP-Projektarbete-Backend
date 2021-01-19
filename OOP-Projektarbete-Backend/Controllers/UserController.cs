@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using OOP_Projektarbete_Backend.DTOs;
 using OOP_Projektarbete_Backend.Helpers;
 using OOP_Projektarbete_Backend.Models;
+using OOP_Projektarbete_Backend.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -259,6 +260,50 @@ namespace OOP_Projektarbete_Backend.Controllers
             friendRequest.FriendRequestFlag = FriendRequestFlag.Rejected;
             await _context.SaveChangesAsync();
             return Ok();
+
+        }
+
+        [HttpPost("[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task SendMessage([FromBody] MessageViewModel model)
+        {
+            var user = await _context.Users
+                .Include(x => x.ReceievedFriendRequests)
+                .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
+            var userToReceiveMessage = await _context.Users.FirstOrDefaultAsync(x => x.UserName == model.SendTo);
+
+            var message = new Message()
+            {
+                Id = Guid.NewGuid().ToString(),
+                MovieId = model.MovieId,
+                MessageContent = model.Message,
+                Read = false,
+                SentBy = user.UserName,
+                User = userToReceiveMessage
+            };
+
+             _context.Messages.Add(message);
+            await _context.SaveChangesAsync();
+
+
+        }
+
+        [HttpGet("[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetMessages()
+        {
+            var user = await _context.Users
+                .Include(x => x.ReceievedFriendRequests)
+                .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
+
+            var messages = await _context.Messages.Where(x => x.UserId == user.Id).Select(x => new MessageViewModel() { From = x.SentBy, Message = x.MessageContent, MovieId = x.MovieId }).ToListAsync();
+            if (messages != null)
+            {
+               
+                return Ok(messages);
+            }
+            return NotFound();
+
 
         }
     }

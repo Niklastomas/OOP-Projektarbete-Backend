@@ -2,6 +2,7 @@
 using OOP_Projektarbete_Backend.DTOs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,7 +14,10 @@ namespace OOP_Projektarbete_Backend.Models
 
         public List<Friend> ReceievedFriendRequests { get; set; } = new List<Friend>();
 
+        [NotMapped]
         public List<UserDTO> Friends { get; set; } = new List<UserDTO>();
+
+        public List<Message> Messages { get; set; } = new List<Message>();
         //{
         //    get
         //    {

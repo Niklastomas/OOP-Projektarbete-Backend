@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OOP_Projektarbete_Backend;
 
 namespace OOP_Projektarbete_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210119143435_Messages")]
+    partial class Messages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,6 +150,27 @@ namespace OOP_Projektarbete_Backend.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("OOP_Projektarbete_Backend.DTOs.UserDTO", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDTO");
                 });
 
             modelBuilder.Entity("OOP_Projektarbete_Backend.Models.Friend", b =>
@@ -335,6 +358,13 @@ namespace OOP_Projektarbete_Backend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OOP_Projektarbete_Backend.DTOs.UserDTO", b =>
+                {
+                    b.HasOne("OOP_Projektarbete_Backend.Models.User", null)
+                        .WithMany("Friends")
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("OOP_Projektarbete_Backend.Models.Friend", b =>
                 {
                     b.HasOne("OOP_Projektarbete_Backend.Models.User", "RequestedBy")
@@ -361,6 +391,8 @@ namespace OOP_Projektarbete_Backend.Migrations
 
             modelBuilder.Entity("OOP_Projektarbete_Backend.Models.User", b =>
                 {
+                    b.Navigation("Friends");
+
                     b.Navigation("Messages");
 
                     b.Navigation("ReceievedFriendRequests");

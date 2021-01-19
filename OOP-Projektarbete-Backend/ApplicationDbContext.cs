@@ -16,12 +16,19 @@ namespace OOP_Projektarbete_Backend
         }
 
         public DbSet<UsersMovies> UsersMovies { get; set; }
+        public DbSet<Friend> Friends { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<UsersMovies>().HasKey(x => new { x.Id });
+
+            builder.Entity<Message>()
+                .HasOne(x => x.User)
+                .WithMany(x => x.Messages)
+                .HasForeignKey(x => x.UserId);
 
             builder.Entity<Friend>()
                 .HasOne(x => x.RequestedBy)
