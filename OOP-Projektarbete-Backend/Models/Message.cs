@@ -11,6 +11,7 @@ namespace OOP_Projektarbete_Backend.Models
         public string MovieId { get; set; }
         public string MessageContent { get; set; }
         public bool Read { get; set; }
+        public DateTime? Sent { get; set; }
         public string SentBy { get; set; }
 
 

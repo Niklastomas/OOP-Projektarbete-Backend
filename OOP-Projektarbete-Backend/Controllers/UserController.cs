@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using OOP_Projektarbete_Backend.DTOs;
 using OOP_Projektarbete_Backend.Helpers;
 using OOP_Projektarbete_Backend.Models;
+using OOP_Projektarbete_Backend.Services.Interfaces;
 using OOP_Projektarbete_Backend.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -25,36 +26,25 @@ namespace OOP_Projektarbete_Backend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly IMovieRepository _movieRepository;
+        private readonly IUserService _userService;
 
-        public UserController(ApplicationDbContext context, UserManager<User> userManager, IMovieRepository movieRepository)
+        public UserController(ApplicationDbContext context, UserManager<User> userManager, IMovieRepository movieRepository, IUserService userService)
         {
             _context = context;
             _userManager = userManager;
             _movieRepository = movieRepository;
+            _userService = userService;
         }
         [HttpGet("[action]")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetUsers()
         {
-            var userList = new List<UserDTO>();
-            var users = await _context.Users.Where(x => x.Email != User.Identity.Name).ToListAsync();
-
-            if (users != null)
+            var result = await _userService.ListAsync(User.Identity.Name);
+            if (!result.Success)
             {
-                foreach (var user in users)
-                {
-                    var userDTO = new UserDTO()
-                    {
-                        Id = user.Id,
-                        Username = user.UserName,
-                        Email = user.Email
-                    };
-                    userList.Add(userDTO);
-                }
-                return Ok(userList);
+                return BadRequest(result.Message);
             }
-            return NotFound();
-          
+            return Ok(result.Resource);
         }
 
 
@@ -64,23 +54,13 @@ namespace OOP_Projektarbete_Backend.Controllers
         public async Task<IActionResult> GetMovies()
         {
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var usersMovies = await _context.UsersMovies.Where(x => x.UserId == user.Id).ToListAsync();
-            var movies = new List<Movie>();
+            var result = await _userService.ListMoviesAsync(user.Id);
 
-            foreach (var item in usersMovies)
+            if (!result.Success)
             {
-                var movie = await _movieRepository.GetMovieDetails(item.MovieId);
-                if (movie != null)
-                {
-                    movies.Add(movie);
-                }
+                return BadRequest(result.Message);
             }
-
-            if (movies != null)
-            {
-                return Ok(movies);
-            }
-            return BadRequest();
+            return Ok(result.Resource);
         }
 
         [HttpPost("[action]/{movieId}")]
@@ -88,16 +68,14 @@ namespace OOP_Projektarbete_Backend.Controllers
         public async Task<IActionResult> AddMovie(string movieId)
         {
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var movie = await _movieRepository.GetMovieDetails(movieId);
-            var usersMovies = new UsersMovies()
+            var result = await _userService.AddMovieAsync(movieId, user.Id);
+
+            if (!result.Success)
             {
-                Id = Guid.NewGuid().ToString(),
-                UserId = user.Id,
-                MovieId = movieId
-            };
-            _context.UsersMovies.Add(usersMovies);
-            await _context.SaveChangesAsync();
-            return Ok(movie);
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Resource);
+  
         }
 
         [HttpDelete("[action]/{movieId}")]
@@ -234,28 +212,34 @@ namespace OOP_Projektarbete_Backend.Controllers
         {
             var user = await _context.Users
                 .Include(x => x.ReceievedFriendRequests)
+                .ThenInclude(x => x.RequestedBy)
                 .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
 
             var friendRequest = user.ReceievedFriendRequests
                 .Where(x => x.Id == friendRequestId)
                 .FirstOrDefault();
             friendRequest.FriendRequestFlag = FriendRequestFlag.Approved;
+            var newFriend = new UserDTO()
+            {
+                Id = friendRequest.RequestedBy.Id,
+                Email = friendRequest.RequestedBy.Email,
+                Username = friendRequest.RequestedBy.UserName
+            };
             await _context.SaveChangesAsync();
-            return Ok();
+            return Ok(newFriend);
            
         }
 
-        [HttpPost("[action]/{requestedById}")]
+        [HttpPost("[action]/{friendRequestId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> DeclineFriendRequest(string requestedById)
+        public async Task<IActionResult> DeclineFriendRequest(string friendRequestId)
         {
             var user = await _context.Users
                 .Include(x => x.ReceievedFriendRequests)
                 .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
 
             var friendRequest = user.ReceievedFriendRequests
-                .Where(x => x.RequestedById == requestedById)
-                .Where(x => x.RequestedToId == user.Id)
+                .Where(x => x.Id == friendRequestId)
                 .FirstOrDefault();
             friendRequest.FriendRequestFlag = FriendRequestFlag.Rejected;
             await _context.SaveChangesAsync();
@@ -265,7 +249,7 @@ namespace OOP_Projektarbete_Backend.Controllers
 
         [HttpPost("[action]")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task SendMessage([FromBody] MessageViewModel model)
+        public async Task SendMessage([FromBody] SendMessageViewModel model)
         {
             var user = await _context.Users
                 .Include(x => x.ReceievedFriendRequests)
@@ -278,6 +262,7 @@ namespace OOP_Projektarbete_Backend.Controllers
                 MovieId = model.MovieId,
                 MessageContent = model.Message,
                 Read = false,
+                Sent = DateTime.Now,
                 SentBy = user.UserName,
                 User = userToReceiveMessage
             };
@@ -296,13 +281,28 @@ namespace OOP_Projektarbete_Backend.Controllers
                 .Include(x => x.ReceievedFriendRequests)
                 .FirstOrDefaultAsync(x => x.Email == User.Identity.Name);
 
-            var messages = await _context.Messages.Where(x => x.UserId == user.Id).Select(x => new MessageViewModel() { From = x.SentBy, Message = x.MessageContent, MovieId = x.MovieId }).ToListAsync();
+            var messages = await _context.Messages.Where(x => x.UserId == user.Id).Select(x => new GetMessageViewModel() {Id = x.Id, From = x.SentBy, Message = x.MessageContent, MovieId = x.MovieId, Sent = x.Sent, Read = x.Read }).ToListAsync();
             if (messages != null)
             {
-               
-                return Ok(messages);
+                return Ok(messages.OrderByDescending(x => x.Sent));
             }
             return NotFound();
+
+
+        }
+
+        [HttpPost("[action]/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> MarkMessageAsRead(string id)
+        {
+            var message = await _context.Messages.FirstOrDefaultAsync(x => x.Id == id);
+            if (message != null)
+            {
+                message.Read = true;
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            return NotFound("Message not found");
 
 
         }

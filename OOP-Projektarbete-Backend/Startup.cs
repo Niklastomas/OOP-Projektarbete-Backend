@@ -13,6 +13,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OOP_Projektarbete_Backend.Helpers;
 using OOP_Projektarbete_Backend.Models;
+using OOP_Projektarbete_Backend.Repositories;
+using OOP_Projektarbete_Backend.Repositories.Interfaces;
+using OOP_Projektarbete_Backend.Services;
+using OOP_Projektarbete_Backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +90,13 @@ namespace OOP_Projektarbete_Backend
 
             services.AddHttpContextAccessor();
 
+            //Repositories
             services.AddScoped<IMovieRepository, MovieRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+      
+
+            //Services
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IHttpService, HttpService>();
         }
 
