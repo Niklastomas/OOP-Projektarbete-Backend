@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -27,72 +28,34 @@ namespace OOP_Projektarbete_Backend.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IMovieRepository _movieRepository;
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UserController(ApplicationDbContext context, UserManager<User> userManager, IMovieRepository movieRepository, IUserService userService)
+
+        public UserController(ApplicationDbContext context, UserManager<User> userManager, IMovieRepository movieRepository, IUserService userService, IMapper mapper)
         {
             _context = context;
             _userManager = userManager;
             _movieRepository = movieRepository;
             _userService = userService;
+            _mapper = mapper;
         }
         [HttpGet("[action]")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> GetUsers()
         {
-            var result = await _userService.ListAsync(User.Identity.Name);
+            var result = await _userService.GetAllAsync(User.Identity.Name);
             if (!result.Success)
             {
                 return BadRequest(result.Message);
             }
-            return Ok(result.Resource);
+            var users = _mapper.Map<IEnumerable<User>, IEnumerable<UserViewModel>>(result.Resource);
+            return Ok(users);
         }
 
 
 
-        [HttpGet("[action]")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> GetMovies()
-        {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var result = await _userService.ListMoviesAsync(user.Id);
 
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
-            return Ok(result.Resource);
-        }
-
-        [HttpPost("[action]/{movieId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> AddMovie(string movieId)
-        {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var result = await _userService.AddMovieAsync(movieId, user.Id);
-
-            if (!result.Success)
-            {
-                return BadRequest(result.Message);
-            }
-            return Ok(result.Resource);
   
-        }
-
-        [HttpDelete("[action]/{movieId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<IActionResult> DeleteMovie(string movieId)
-        {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var usersMovies = await _context.UsersMovies.Where(x => x.UserId == user.Id).Where(x => x.MovieId == movieId).FirstOrDefaultAsync();
-
-            if (usersMovies != null)
-            {
-                _context.UsersMovies.Remove(usersMovies);
-                await _context.SaveChangesAsync();
-                return Ok(movieId);
-            }
-            return BadRequest();
-        }
 
         [HttpPost("[action]/{userId}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

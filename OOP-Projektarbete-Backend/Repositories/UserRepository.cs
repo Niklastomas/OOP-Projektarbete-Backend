@@ -10,6 +10,7 @@ namespace OOP_Projektarbete_Backend.Repositories
 {
     public class UserRepository : BaseRepository, IUserRepository
     {
+
         public UserRepository(ApplicationDbContext context) : base(context)
         {
 
@@ -17,21 +18,36 @@ namespace OOP_Projektarbete_Backend.Repositories
 
       
 
-        public async Task<IEnumerable<User>> ListAsync(string currentUser)
+        public async Task<IEnumerable<User>> GetAllAsync(string email)
         {
-            return await _context.Users.Where(x => x.Email != currentUser).ToListAsync();
+            return await _context.Users.Where(x => x.Email != email).ToListAsync();
 
         }
 
-        public async Task<IEnumerable<UsersMovies>> ListMoviesAsync(string userId)
+        public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _context.UsersMovies.Where(x => x.UserId == userId).ToListAsync();
+            return await _context.Users.ToListAsync();
+
         }
 
-        public async Task AddMovieAsync(UsersMovies movie)
+        public async Task<User> GetUserByIdAsync(string id)
         {
-            await _context.UsersMovies.AddAsync(movie);
-            await _context.SaveChangesAsync();
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
+
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+        }
+
+        public async Task<User> GetUserWithFriendsAsync(string email)
+        {
+            return await _context.Users
+                .Include(x => x.SentFriendRequests.Where(x => x.FriendRequestFlag == FriendRequestFlag.Approved))
+                .Include(x => x.ReceievedFriendRequests.Where(x => x.FriendRequestFlag == FriendRequestFlag.Approved))
+                .FirstOrDefaultAsync(x => x.Email == email);
+           
+        }
+
     }
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,6 +38,7 @@ namespace OOP_Projektarbete_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
             services.AddCors(o => o.AddPolicy("CORSPolicy", builder =>
                 builder.AllowAnyOrigin()
                 .AllowAnyMethod()
@@ -90,14 +92,19 @@ namespace OOP_Projektarbete_Backend
 
             services.AddHttpContextAccessor();
 
-            //Repositories
             services.AddScoped<IMovieRepository, MovieRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUsersMoviesRepository, UsersMoviesRepository>();
       
-
-            //Services
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IFriendService, FriendService>();
+            services.AddScoped<IUsersMoviesService, UsersMoviesService>();
             services.AddScoped<IHttpService, HttpService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddAutoMapper(typeof(Startup));
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -8,8 +8,10 @@ namespace OOP_Projektarbete_Backend.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        Task<IEnumerable<User>> ListAsync(string currentUser);
-        Task<IEnumerable<UsersMovies>> ListMoviesAsync(string userId);
-        Task AddMovieAsync(UsersMovies usersMoives);
+        Task<IEnumerable<User>> GetAllAsync();
+        Task<IEnumerable<User>> GetAllAsync(string email);
+        Task<User> GetUserWithFriendsAsync(string email);
+        Task<User> GetUserByIdAsync(string id);
+        Task<User> GetUserByEmailAsync(string email);
     }
 }
