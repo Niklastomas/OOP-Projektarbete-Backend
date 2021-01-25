@@ -95,10 +95,13 @@ namespace OOP_Projektarbete_Backend
             services.AddScoped<IMovieRepository, MovieRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUsersMoviesRepository, UsersMoviesRepository>();
+            services.AddScoped<IFriendRepository, FriendRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
       
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFriendService, FriendService>();
             services.AddScoped<IUsersMoviesService, UsersMoviesService>();
+            services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IHttpService, HttpService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

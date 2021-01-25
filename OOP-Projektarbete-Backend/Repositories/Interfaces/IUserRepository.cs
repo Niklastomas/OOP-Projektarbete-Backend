@@ -13,5 +13,6 @@ namespace OOP_Projektarbete_Backend.Repositories.Interfaces
         Task<User> GetUserWithFriendsAsync(string email);
         Task<User> GetUserByIdAsync(string id);
         Task<User> GetUserByEmailAsync(string email);
+        Task<User> GetUserWithReceievedRequestsAsync(string email);
     }
 }

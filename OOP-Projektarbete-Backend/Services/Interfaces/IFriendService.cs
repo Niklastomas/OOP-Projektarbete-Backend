@@ -10,6 +10,9 @@ namespace OOP_Projektarbete_Backend.Services.Interfaces
     public interface IFriendService
     {
         Task<FriendsResponse> GetFriendsAsync(string email);
-        Task<FriendRequestResponse> SendFriendRequestAsync(string requestedByEmail, string requestedToId);
+        Task<FriendResponse> SendFriendRequestAsync(string requestedByEmail, string requestedToId);
+        Task<FriendRequestsResponse> GetFriendRequestsAsync(string email);
+        Task<UserResponse> AcceptFriendRequestAsync(string requestId);
+        Task<UserResponse> DeclineFriendRequestAsync(string requestId);
     }
 }

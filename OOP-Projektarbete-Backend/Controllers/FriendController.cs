@@ -2,15 +2,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using OOP_Projektarbete_Backend.DTOs;
 using OOP_Projektarbete_Backend.Models;
 using OOP_Projektarbete_Backend.Services.Interfaces;
-using OOP_Projektarbete_Backend.ViewModels;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace OOP_Projektarbete_Backend.Controllers
@@ -39,7 +35,7 @@ namespace OOP_Projektarbete_Backend.Controllers
             {
                 return BadRequest(result.Message);
             }
-            var users = _mapper.Map<IEnumerable<User>, IEnumerable<UserViewModel>>(result.Resource);
+            var users = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(result.Resource);
             return Ok(users);
 
         }
@@ -55,6 +51,48 @@ namespace OOP_Projektarbete_Backend.Controllers
             }
             return Ok(result.Resource);
             
+        }
+
+        [HttpGet("[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetFriendRequests()
+        {
+            var result = await _friendService.GetFriendRequestsAsync(User.Identity.Name);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            return Ok(result.Resource);
+
+
+        }
+
+        [HttpPut("[action]/{friendRequestId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> AcceptFriendRequest(string friendRequestId)
+        {
+            var result = await _friendService.AcceptFriendRequestAsync(friendRequestId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            var newFriend = _mapper.Map<UserDTO>(result.Resource);
+            return Ok(newFriend);
+
+        }
+
+        [HttpPut("[action]/{friendRequestId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> DeclineFriendRequest(string friendRequestId)
+        {
+            var result = await _friendService.DeclineFriendRequestAsync(friendRequestId);
+            if (!result.Success)
+            {
+                return BadRequest(result.Message);
+            }
+            var declinedUser = _mapper.Map<UserDTO>(result.Resource);
+            return Ok(declinedUser);
+
         }
     }
 }

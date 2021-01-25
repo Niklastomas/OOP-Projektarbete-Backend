@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Tokens;
 using OOP_Projektarbete_Backend.DTOs;
 using OOP_Projektarbete_Backend.Models;
 using OOP_Projektarbete_Backend.Services.Interfaces;
-using OOP_Projektarbete_Backend.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -86,7 +85,7 @@ namespace OOP_Projektarbete_Backend.Controllers
             {
                 return BadRequest(result.Message);
             }
-            var users = _mapper.Map<IEnumerable<User>, IEnumerable<UserViewModel>>(result.Resource);
+            var users = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(result.Resource);
             return Ok(users);
             
         }

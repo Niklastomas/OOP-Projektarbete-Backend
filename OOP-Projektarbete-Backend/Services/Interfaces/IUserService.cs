@@ -8,8 +8,8 @@ namespace OOP_Projektarbete_Backend.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<UserResponse> GetAllAsync();
-        Task<UserResponse> GetAllAsync(string currentUser);
+        Task<UsersResponse> GetAllAsync();
+        Task<UsersResponse> GetAllAsync(string currentUser);
         //Task<MoviesResponse> ListMoviesAsync(string userId);
         //Task<MovieResponse> AddMovieAsync(string movieId, string userId);
     }

@@ -38,6 +38,7 @@ namespace OOP_Projektarbete_Backend.Repositories
         public async Task<User> GetUserByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+ 
         }
 
         public async Task<User> GetUserWithFriendsAsync(string email)
@@ -49,5 +50,11 @@ namespace OOP_Projektarbete_Backend.Repositories
            
         }
 
+        public async Task<User> GetUserWithReceievedRequestsAsync(string email)
+        {
+            return await _context.Users
+                .Include(x => x.ReceievedFriendRequests.Where(x => x.FriendRequestFlag == FriendRequestFlag.None))
+                .FirstOrDefaultAsync(x => x.Email == email);
+        }
     }
 }

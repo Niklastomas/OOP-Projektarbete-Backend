@@ -1,4 +1,7 @@
-﻿using OOP_Projektarbete_Backend.Models;
+﻿using AutoMapper;
+using OOP_Projektarbete_Backend.DTOs;
+using OOP_Projektarbete_Backend.Models;
+using OOP_Projektarbete_Backend.Repositories;
 using OOP_Projektarbete_Backend.Repositories.Interfaces;
 using OOP_Projektarbete_Backend.Services.Communication;
 using OOP_Projektarbete_Backend.Services.Interfaces;
@@ -12,16 +15,22 @@ namespace OOP_Projektarbete_Backend.Services
     public class FriendService : IFriendService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IFriendRepository _friendRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
         public FriendService(IUserRepository userRepository,
-            IUnitOfWork unitOfWork)
+            IFriendRepository friendRepository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
             _userRepository = userRepository;
+            _friendRepository = friendRepository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<FriendRequestResponse> SendFriendRequestAsync(string requestedByEmail, string requestedToId)
+        public async Task<FriendResponse> SendFriendRequestAsync(string requestedByEmail, string requestedToId)
         {
             try
             {
@@ -37,15 +46,15 @@ namespace OOP_Projektarbete_Backend.Services
                         RequestedTime = DateTime.Now,
                         FriendRequestFlag = FriendRequestFlag.None
                     };
-                    requestedBy.SentFriendRequests.Add(friendRequest);
+                    await _friendRepository.AddAsync(friendRequest);
                     await _unitOfWork.CompleteAsync();
-                    return new FriendRequestResponse(friendRequest);
+                    return new FriendResponse(friendRequest);
                 }
-                return new FriendRequestResponse("User not found");
+                return new FriendResponse("User not found");
             }
             catch (Exception ex)
             {
-                return new FriendRequestResponse(ex.Message);
+                return new FriendResponse(ex.Message);
             }
             
         }
@@ -56,33 +65,105 @@ namespace OOP_Projektarbete_Backend.Services
             {
                 var friends = new List<User>();
                 var user = await _userRepository.GetUserWithFriendsAsync(email);
-                if (user.SentFriendRequests != null)
+
+                var received = await _friendRepository.GetReceivedApprovedAsync(user.Id);
+                var sent = await _friendRepository.GetSentApprovedAsync(user.Id);
+
+                if (received != null)
                 {
-                    foreach (var item in user.SentFriendRequests)
+                    foreach (var request in received)
                     {
-                        var friend = await _userRepository.GetUserByIdAsync(item.RequestedToId);
-                        friends.Add(friend);
-                    }                 
-                }
-                if (user.ReceievedFriendRequests != null)
-                {
-                    foreach (var item in user.ReceievedFriendRequests)
-                    {
-                        var friend = await _userRepository.GetUserByIdAsync(item.RequestedById);
+                        var friend = await _userRepository.GetUserByIdAsync(request.RequestedById);
                         friends.Add(friend);
                     }
                 }
-                if (friends.Count == 0)
+                if (sent != null)
                 {
-                    return new FriendsResponse("No friends found");
+                    foreach (var request in sent)
+                    {
+                        var friend = await _userRepository.GetUserByIdAsync(request.RequestedToId);
+                        friends.Add(friend);
+                    }
                 }
                 return new FriendsResponse(friends);
+           
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return new FriendsResponse(ex.Message);
             }
+        }
+
+        public async Task<FriendRequestsResponse> GetFriendRequestsAsync(string email)
+        {
+            try
+            {
+                var friendRequests = new List<FriendRequest>();
+                var user = await _userRepository.GetUserByEmailAsync(email);
+                var requests = await _friendRepository.GetRequestsAsync(user.Id);
+                if (requests != null)
+                {
+                    foreach (var request in requests)
+                    {
+                        var requestSentBy = _mapper.Map<UserDTO>(await _userRepository.GetUserByIdAsync(request.RequestedById));
+                        var friendRequest = new FriendRequest()
+                        {
+                            Id = request.Id,
+                            RequestSentBy = requestSentBy,
+                            RequestedTime = request.RequestedTime
+                        };
+                        friendRequests.Add(friendRequest);
+                    }
+                    return new FriendRequestsResponse(friendRequests);
+                }
+                return new FriendRequestsResponse("No requests found");
+            }
+            catch (Exception ex)
+            {
+                return new FriendRequestsResponse(ex.Message);
+            }            
+        }
+
+        public async Task<UserResponse> AcceptFriendRequestAsync(string requestId)
+        {
+            try
+            {
+                var friendRequest = await _friendRepository.GetByIdAsync(requestId);
+                if (friendRequest != null)
+                {
+                    friendRequest.FriendRequestFlag = FriendRequestFlag.Approved;
+                    await _unitOfWork.CompleteAsync();
+                    return new UserResponse(friendRequest.RequestedBy);
+                }
+                return new UserResponse("No requests found");
+            }
+            catch (Exception ex)
+            {
+                return new UserResponse(ex.Message);
+            }
+            
+            
+        }
+
+        public async Task<UserResponse> DeclineFriendRequestAsync(string requestId)
+        {
+            try
+            {
+                var friendRequest = await _friendRepository.GetByIdAsync(requestId);
+                if (friendRequest != null)
+                {
+                    friendRequest.FriendRequestFlag = FriendRequestFlag.Rejected;
+                    await _unitOfWork.CompleteAsync();
+                    return new UserResponse(friendRequest.RequestedBy);
+                }
+                return new UserResponse("No requests found");
+            }
+            catch (Exception ex)
+            {
+                return new UserResponse(ex.Message);
+            }
+
+
         }
     }
 }

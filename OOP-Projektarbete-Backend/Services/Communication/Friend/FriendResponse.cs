@@ -7,14 +7,16 @@ using System.Threading.Tasks;
 
 namespace OOP_Projektarbete_Backend.Services.Communication
 {
-    public class FriendRequestResponse : BaseResponse<Friend>
+    public class FriendResponse : BaseResponse<Friend>
     {
-        public FriendRequestResponse(Friend friend) : base(friend)
+        //Success response
+        public FriendResponse(Friend friend) : base(friend)
         {
 
         }
 
-        public FriendRequestResponse(string message) : base(message)
+        //Error response
+        public FriendResponse(string message) : base(message)
         {
             
         }

@@ -40,10 +40,6 @@ namespace OOP_Projektarbete_Backend.Services
                         movies.Add(movie);
                     }
                 }
-                if (movies.Count == 0)
-                {
-                    return new MoviesResponse("No movies found");
-                }
                 return new MoviesResponse(movies);
             }
             catch (Exception ex)
