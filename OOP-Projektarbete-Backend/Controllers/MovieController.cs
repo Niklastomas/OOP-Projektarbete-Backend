@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using OOP_Projektarbete_Backend.Caching;
 using OOP_Projektarbete_Backend.DTOs;
 using OOP_Projektarbete_Backend.Helpers;
 using OOP_Projektarbete_Backend.Models;
@@ -20,64 +22,78 @@ namespace OOP_Projektarbete_Backend.Controllers
     public class MovieController : ControllerBase
     {
         private IMovieRepository _movieRepository;
+        private IMemoryCache _cache;
 
-        public MovieController(IMovieRepository movieRepository)
+        public MovieController(IMovieRepository movieRepository,
+            IMemoryCache cache)
         {
             _movieRepository = movieRepository;
+            _cache = cache;
         }
 
         // GET: api/<MovieController>/Trending
         [HttpGet("[action]")]
         public async Task<IActionResult> Trending()
         {
-            try
+            var movies = await _cache.GetOrCreateAsync(CacheKeys.TrendingMovies, async (entry) =>
             {
-                return Ok(await _movieRepository.GetTrendingMovies());
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
+                return await _movieRepository.GetTrendingMovies();
+            });
 
-                //if (movies != null)
-                //    return Ok(movies);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            if (movies != null )
+                return Ok(movies);
+  
+            return NotFound();
+       
         }
 
         // GET: api/<MovieController>/Popular
         [HttpGet("[action]/{page}")]
-        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<IActionResult> Popular(string page)
         {
-            var movies = await _movieRepository.GetPopularMovies(page);
+            var movies = await _cache.GetOrCreateAsync(CacheKeys.PopularMovies, async (entry) =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
+                return await _movieRepository.GetPopularMovies(page);
+            });
 
             if (movies != null)
                 return Ok(movies);
 
-            return BadRequest();
+            return NotFound();
         }
 
         // GET: api/<MovieController>/TopRated
         [HttpGet("[action]/{page}")]
         public async Task<IActionResult> TopRated(string page)
         {
-            var movies = await _movieRepository.GetTopRatedMovies(page);
+            var movies = await _cache.GetOrCreateAsync(CacheKeys.TopRatedMovies, async (entry) =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
+                return await _movieRepository.GetTopRatedMovies(page);
+            });
 
             if (movies != null)
                 return Ok(movies);
 
-            return BadRequest();
+            return NotFound();
         }
 
         // GET: api/<MovieController>/Upcoming
         [HttpGet("[action]/{page}")]
         public async Task<IActionResult> Upcoming(string page)
         {
-            var movies = await _movieRepository.GetUpcomingMovies(page);
+            var movies = await _cache.GetOrCreateAsync(CacheKeys.UpcomingMovies, async (entry) =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
+                return await _movieRepository.GetUpcomingMovies(page);
+            });
 
             if (movies != null)
                 return Ok(movies);
 
-            return BadRequest();
+            return NotFound();
         }
 
         // GET api/<MovieController>/query/page
@@ -90,28 +106,29 @@ namespace OOP_Projektarbete_Backend.Controllers
             if (movies != null)
                 return Ok(movies);
 
-            return BadRequest();
+            return NotFound();
         }
 
         // GET api/MovieDetails/id
         [HttpGet("[action]/{id}")]
         public async Task<IActionResult> MovieDetails(string id)
         {
-            var movie = await _movieRepository.GetMovieDetails(id);
-            var trailer = await _movieRepository.GetMovieTrailer(id);
-
-            if (movie != null)
+            var movie = await _cache.GetOrCreateAsync(id, async (entry) =>
             {
-                var movieDTO = new MovieDTO()
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30);
+                var movie = await _movieRepository.GetMovieDetails(id);
+                var trailer = await _movieRepository.GetMovieTrailer(id);
+                return new MovieDTO()
                 {
                     Movie = movie,
                     Trailer = trailer
                 };
 
-                return Ok(movieDTO);
-            }
+            });
+            if (movie != null)
+                return Ok(movie);
 
-            return BadRequest();
+            return NotFound();
         }
 
         [HttpGet("[action]/{id}")]
@@ -122,7 +139,7 @@ namespace OOP_Projektarbete_Backend.Controllers
             if (trailer != null)
                 return Ok(trailer);
 
-            return BadRequest();
+            return NotFound();
         }
     }
 }
